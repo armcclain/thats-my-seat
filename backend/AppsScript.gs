@@ -13,10 +13,16 @@
  *    Ratings
  *      id | user | station_code | romance | categories | ts | note
  *
+ *    Stands  (one row per ride where no seat was free — count only, no seat position)
+ *      id | user | ts | line | station_boarded | car_number
+ *
  *    Quips  (edit this tab any time — the app re-pulls it on every sync, no code changes)
- *      timeOfDay | dayType | text
+ *      timeOfDay | dayType | profile | text
  *      timeOfDay one of: morning | lateMorning | afternoon | evening | night
  *      dayType one of: weekday | weekend
+ *      profile one of: All | Kyle | Abby | Sophie | Caroline
+ *        All   -> shown to every profile
+ *        <name> -> only shown on that person's home screen
  *      text may include {name} — replaced with the active profile's name
  *
  *    (autofilled_fields and categories are JSON-stringified by the app before sending.)
@@ -29,8 +35,8 @@
  * 4. Paste that URL into the app's Sync devices > Cloud Sync field.
  *
  * The script exposes:
- *   GET  ?sheet=Events            -> {rows:[...]}      (also Ratings, Quips)
- *   GET  (no params)              -> {events:[...], ratings:[...], quips:[...]}
+ *   GET  ?sheet=Events            -> {rows:[...]}      (also Ratings, Stands, Quips)
+ *   GET  (no params)              -> {events:[...], ratings:[...], stands:[...], quips:[...]}
  *   POST {sheet, row:{...}}       -> appends one row (deduped by id), returns {ok:true}
  */
 function doGet(e) {
@@ -44,7 +50,7 @@ function doGet(e) {
     if (sheet) {
       return json_({rows: readSheet_(sheet)});
     }
-    return json_({events: readSheet_('Events'), ratings: readSheet_('Ratings'), quips: readSheet_('Quips')});
+    return json_({events: readSheet_('Events'), ratings: readSheet_('Ratings'), stands: readSheet_('Stands'), quips: readSheet_('Quips')});
   } catch (err) {
     return json_({ok:false, error: String(err)});
   }
